@@ -26,3 +26,19 @@ def _province_with_tax(province: DBProvince) -> ProvinceRead:
         is_secondary=province.is_secondary,
         tax_reduction=tax_reduction
     )
+
+@router.get("/{province_id}", response_model=ProvinceRead)
+async def get_province(
+    province_id: int,
+    session: AsyncSession = Depends(get_session)
+):
+    province = await session.get(DBProvince, province_id)
+    if not province:
+        raise HTTPException(status_code=404, detail="Province not found")
+    return _province_with_tax(province)
+
+@router.get("/", response_model=list[ProvinceRead])
+async def list_provinces(session: AsyncSession = Depends(get_session)):
+    result = await session.exec(select(DBProvince))
+    provinces = result.all()
+    return [_province_with_tax(p) for p in provinces]
