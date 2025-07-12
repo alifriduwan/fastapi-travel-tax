@@ -113,6 +113,7 @@ class DBUser(SQLModel, table=True):
 
     email: Optional[EmailStr] = ORMField(default=None, unique=True, index=True)
     phone_number: str = ORMField(unique=True, index=True)
+    selected_province_id: Optional[int] = ORMField(foreign_key="provinces.id")
 
     username: str = ORMField(index=True)
     first_name: str
