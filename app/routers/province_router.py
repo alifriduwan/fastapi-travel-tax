@@ -43,7 +43,6 @@ async def list_provinces(session: AsyncSession = Depends(get_session)):
     provinces = result.all()
     return [_province_with_tax(p) for p in provinces]
 
-
 @router.put("/{province_id}", response_model=ProvinceRead)
 async def update_province(
     province_id: int,
@@ -62,3 +61,16 @@ async def update_province(
     await session.commit()
     await session.refresh(province)
     return _province_with_tax(province)
+
+@router.delete("/{province_id}", status_code=204)
+async def delete_province(
+    province_id: int,
+    session: AsyncSession = Depends(get_session)
+):
+    province = await session.get(DBProvince, province_id)
+    if not province:
+        raise HTTPException(status_code=404, detail="Province not found")
+
+    await session.delete(province)
+    await session.commit()
+    return Response(status_code=204)
