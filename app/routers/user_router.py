@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, Session
 import datetime
 
 from app.models.user_model import (
     DBUser, RegisteredUser, User, Login, UpdatedUser, ChangedPassword
 )
+from app.models.province import DBProvince
 
 from ..models import get_session
 
@@ -91,3 +92,28 @@ async def delete_user(user_id: int, session: AsyncSession = Depends(get_session)
     await session.delete(user)
     await session.commit()
     return
+
+
+@router.get("/{user_id}/tax-info")
+async def get_user_tax_info(
+    user_id: int,
+    session: AsyncSession = Depends(get_session)
+):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not user.selected_province_id:
+        raise HTTPException(status_code=400, detail="User has not selected a province")
+
+    province = await session.get(DBProvince, user.selected_province_id)
+    if not province:
+        raise HTTPException(status_code=404, detail="Province not found")
+
+    return {
+        "user_id": user.id,
+        "province_name": province.province_name,
+        "is_secondary": province.is_secondary,
+        "tax_reduction": 0.2 if province.is_secondary else 0.1
+    }
+
