@@ -51,3 +51,4 @@ async def close_db():
     if engine is not None:
         await engine.dispose()
         engine = None
+

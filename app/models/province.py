@@ -14,6 +14,11 @@ class ProvinceRead(ProvinceBase):
     tax_reduction: float 
     model_config = ConfigDict(from_attributes=True)
 
+class ProvinceUpdate(BaseModel):
+    province_name: Optional[str] = None
+    is_secondary: Optional[bool] = None
+
+
 class DBProvince(SQLModel, table=True):
     __tablename__ = "provinces"
 
