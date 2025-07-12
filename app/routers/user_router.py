@@ -4,7 +4,7 @@ from sqlmodel import select
 import datetime
 
 from app.models.user_model import (
-    DBUser, RegisteredUser, User, Login
+    DBUser, RegisteredUser, User, Login, UpdatedUser
 )
 
 from ..models import get_session
@@ -50,3 +50,24 @@ async def login(login_in: Login, session: AsyncSession = Depends(get_session)):
     if not user or not user.verify_password(login_in.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return {"message": "Login success", "user_id": user.id}
+
+@router.get("/{user_id}", response_model=User)
+async def get_user(user_id: int, session: AsyncSession = Depends(get_session)):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@router.put("/{user_id}", response_model=User)
+async def update_user(user_id: int, user_in: UpdatedUser, session: AsyncSession = Depends(get_session)):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    for k, v in user_in.dict(exclude_unset=True).items():
+        setattr(user, k, v)
+    user.updated_date = datetime.datetime.utcnow()
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user
