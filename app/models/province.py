@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
+from sqlmodel import SQLModel, Field as ORMField
 
 class ProvinceBase(BaseModel):
     province_name: str
@@ -12,3 +13,10 @@ class ProvinceRead(ProvinceBase):
     id: int
     tax_reduction: float 
     model_config = ConfigDict(from_attributes=True)
+
+class DBProvince(SQLModel, table=True):
+    __tablename__ = "provinces"
+
+    id: int | None = ORMField(default=None, primary_key=True)
+    province_name: str = ORMField(unique=True, index=True)
+    is_secondary: bool = ORMField(default=False)
