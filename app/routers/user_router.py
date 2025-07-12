@@ -1,16 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException , status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 import datetime
 
 from app.models.user_model import (
-    DBUser, RegisteredUser, User, Login, UpdatedUser
+    DBUser, RegisteredUser, User, Login, UpdatedUser, ChangedPassword
 )
 
 from ..models import get_session
-import datetime
-
-router = APIRouter(prefix="/users", tags=["users"])
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -71,3 +68,26 @@ async def update_user(user_id: int, user_in: UpdatedUser, session: AsyncSession 
     await session.commit()
     await session.refresh(user)
     return user
+
+@router.post("/{user_id}/change-password")
+async def change_password(user_id: int, pw: ChangedPassword, session: AsyncSession = Depends(get_session)):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.verify_password(pw.current_password):
+        raise HTTPException(status_code=400, detail="Current password incorrect")
+    user.set_password(pw.new_password)
+    user.updated_date = datetime.datetime.utcnow()
+    session.add(user)
+    await session.commit()
+    return {"message": "Password changed successfully"}
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(user_id: int, session: AsyncSession = Depends(get_session)):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    await session.delete(user)
+    await session.commit()
+    return
