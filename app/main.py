@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from .models import init_db, close_db
-from .routers import router as api_router
+from .routers import router as user_router
+from .routers import router as province_router
 
 
 @asynccontextmanager
@@ -17,7 +18,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(api_router)
+app.include_router(user_router)
+app.include_router(province_router)
 
 @app.get("/")
 def read_root() -> dict:
