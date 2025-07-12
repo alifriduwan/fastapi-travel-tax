@@ -117,3 +117,19 @@ async def get_user_tax_info(
         "tax_reduction": 0.2 if province.is_secondary else 0.1
     }
 
+@router.put("/{user_id}/select-province/{province_id}")
+async def select_province(user_id: int, province_id: int, session: AsyncSession = Depends(get_session)):
+    user = await session.get(DBUser, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    province = await session.get(DBProvince, province_id)
+    if not province:
+        raise HTTPException(status_code=404, detail="Province not found")
+
+    user.selected_province_id = province_id
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    return {"message": f"User {user.id} selected province {province.province_name}"}
