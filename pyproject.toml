@@ -13,6 +13,7 @@ dependencies = [
     "fastapi-cli (>=0.0.8,<0.0.9)",
     "bcrypt (>=4.3.0,<5.0.0)",
     "sqlmodel (>=0.0.24,<0.0.25)",
+    "aiosqlite (>=0.21.0,<0.22.0)",
 ]
 
 
