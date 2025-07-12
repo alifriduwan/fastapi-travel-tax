@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
 from .user_model import *
+from .province import *
 
 connect_args = {"check_same_thread": False}
 
