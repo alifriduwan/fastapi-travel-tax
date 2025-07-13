@@ -71,10 +71,14 @@ class RegisteredUser(BaseUser):
     password: str = Field(json_schema_extra=dict(example="YourSecurePassword"))
 
 
-class UpdatedUser(BaseUser):
-    roles: List[str] = Field(
-        json_schema_extra=dict(example=["user", "admin"])
-    )
+# schemas/user.py
+class UpdatedUser(BaseModel):
+    email: Optional[EmailStr] = None
+    phone_number: Optional[str] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    roles: Optional[List[str]] = None
 
 class ResetedPassword(BaseModel):
     email: EmailStr = Field(json_schema_extra=dict(example="user@email.local"))
